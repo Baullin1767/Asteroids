@@ -25,10 +25,20 @@ public class GameManager : MonoBehaviour
     public GameObject gameOverUI;
 
     /// <summary>
-    /// Пользовательский интервейс появляющийся при входа в меню
+    /// Кнопка новой игры
     /// </summary> 
-    [Tooltip("The UI displayed during enter in the menu")]
-    public GameObject menuUi;
+    [Tooltip("New Game botton")]
+    public GameObject newGame;
+    /// <summary>
+    /// кнопка продолжения
+    /// </summary> 
+    [Tooltip("Retry botton")]
+    public GameObject retry;
+    /// <summary>
+    /// Кнопка выхода
+    /// </summary> 
+    [Tooltip("Exit botton")]
+    public GameObject exit;
 
     /// <summary>
     /// Текущий счет игрока.
@@ -54,19 +64,21 @@ public class GameManager : MonoBehaviour
     [Tooltip("The UI text that displays the player's lives.")]
     public Text livesText;
 
+    bool pause;
     private void Start()
     {
-        Menu();
+        Time.timeScale = 0;
+        newGame.SetActive(true);
+        exit.SetActive(true);
+        pause = true;
+
     }
 
     private void Update()
     {
-        if (lives <= 0 && Input.GetKeyDown(KeyCode.Return)) {
-            NewGame();
-        }
-        else if (Input.GetKeyDown(KeyCode.Menu))
+        if (lives <= 0 /*&& pause == false*/)
         {
-            Menu();
+            NewGame();
         }
     }
 
@@ -74,20 +86,25 @@ public class GameManager : MonoBehaviour
     {
         
         gameOverUI.SetActive(false);
-        Time.timeScale = 0;
-        menuUi.SetActive(true);
+        newGame.SetActive(true);
+        retry.SetActive(true);
+        exit.SetActive(true);
 
     }
 
     public void Retry() 
     {
+        pause = false;
         Time.timeScale = 1;
-        menuUi.SetActive(false);
+        newGame.SetActive(false);
+        retry.SetActive(false);
+        exit.SetActive(false);
     }
     
     public void NewGame()
     {
-        
+        pause = false;
+        Time.timeScale = 1;
         Asteroid[] asteroids = FindObjectsOfType<Asteroid>();
 
         // Очищает сцену от астероидов, чтобы начать сначала
@@ -96,11 +113,18 @@ public class GameManager : MonoBehaviour
         }
 
         gameOverUI.SetActive(false);
-        menuUi.SetActive(true);
+        newGame.SetActive(false);
+        retry.SetActive(false);
+        exit.SetActive(false);
 
         SetScore(0);
         SetLives(3);
         Respawn();
+    }
+
+    public void Exit() 
+    {
+        Application.Quit();
     }
 
     public void Respawn()
