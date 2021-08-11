@@ -1,0 +1,58 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+public class TouchPad : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointerUpHandler
+{
+    private Vector2 origin;
+    private Vector2 direction;
+
+    private Vector2 smothingDirection;
+    public float smothing = 0.1f;
+
+    int pointerID;
+    bool touched;
+
+    private void Awake()
+    {
+        direction = Vector2.zero;
+        touched = false;
+    }
+
+    public void OnPointerDown(PointerEventData eventData) 
+    {
+        if (!touched)
+        {
+            origin = eventData.position;
+            touched = true;
+            pointerID = eventData.pointerId;
+        }
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (eventData.pointerId == pointerID)
+        {
+            Vector2 currentPosition = eventData.position;
+            Vector2 directionRaw = currentPosition - origin;
+            direction = directionRaw.normalized; 
+        }
+    }
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (eventData.pointerId == pointerID)
+        {
+            direction = Vector2.zero;
+            touched = false;
+        }
+    }
+
+    public Vector2 GetDirection()
+    {
+        smothingDirection = Vector2.MoveTowards(smothingDirection, direction, smothing);
+        return smothingDirection; 
+    }
+
+    public bool Move() { return touched; }
+}

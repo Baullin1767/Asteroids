@@ -39,24 +39,31 @@ public class Player : MonoBehaviour
     /// <summary>
     /// Направление поворота. 1=налево, -1=направо, 0=прямо
     /// </summary>
-    public float turnDirection = 0.0f;
+    float turnDirection = 0.0f;
 
     /// <summary>
     /// Активированы ли двигатели корабля, заставляющие его двигаться вперед.
     /// </summary>
-    public bool thrusting;
+    bool thrusting;
 
     /// <summary>
     /// Rigidbody component игрока
     /// </summary>
     new Rigidbody2D rigidbody;
 
-    private void Awake()
+    /// <summary>
+    /// Элементы управления
+    /// </summary>
+    [Tooltip("Elements of Control")]
+    public TouchPad touchPad;
+    public FireZone fireZone;
+
+    void Awake()
     {
         rigidbody = GetComponent<Rigidbody2D>();
     }
 
-    private void OnEnable()
+    void OnEnable()
     {
         
         gameObject.layer = LayerMask.NameToLayer("Ignore Collisions");
@@ -64,24 +71,27 @@ public class Player : MonoBehaviour
         Invoke(nameof(TurnOnCollisions), respawnInvulnerability);
     }
 
-    private void Update()
+    void Update()
     {
-        this.thrusting = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow);
+        thrusting = touchPad.Move();
 
-        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) {
+        Vector2 direction = touchPad.GetDirection();
+
+        if (direction.x < 0) {
             turnDirection = 1.0f;
-        } else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) {
+        } else if (direction.x > 0) {
             turnDirection = -1.0f;
         } else {
             turnDirection = 0.0f;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0)) {
-            Shoot();
-        }
+        //if (fireZone.Shoot())
+        //{
+        //    Shoot();
+        //}
     }
 
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         // Add force для движения вперёд
         if (thrusting) {
@@ -94,18 +104,18 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void Shoot()
+    public void Shoot()
     {
         Bullet bullet = Instantiate(bulletPrefab, transform.position, transform.rotation);
         bullet.Project(transform.up);
     }
 
-    private void TurnOnCollisions()
+    void TurnOnCollisions()
     {
-        this.gameObject.layer = LayerMask.NameToLayer("Player");
+        gameObject.layer = LayerMask.NameToLayer("Player");
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Asteroid" || collision.gameObject.tag == "RedBullet" || collision.gameObject.tag == "Ufo")
         {
