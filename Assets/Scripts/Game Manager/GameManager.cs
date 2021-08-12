@@ -49,21 +49,23 @@ public class GameManager : MonoBehaviour
     [Tooltip("The UI text that displays the player's lives.")]
     public Text livesText;
 
+    bool pushReset = false;
+
     private void Start()
     {
         NewGame();
     }
     private void Update()
     {
-        if (lives <= 0)
+        if (lives <= 0 && pushReset)
         {
+            pushReset = false;
             NewGame();
         }
     }
 
     public void NewGame()
     {
-        Time.timeScale = 1;
         Asteroid[] asteroids = FindObjectsOfType<Asteroid>();
 
         // Очищает сцену от астероидов, чтобы начать сначала
@@ -76,6 +78,11 @@ public class GameManager : MonoBehaviour
         SetScore(0);
         SetLives(3);
         Respawn();
+    }
+
+    public void PushReset()
+    {
+        pushReset = true;
     }
 
     public void Respawn()
@@ -134,7 +141,7 @@ public class GameManager : MonoBehaviour
 
     private void SetLives(int lives)
     {
-        this.lives += lives;
+        this.lives = lives;
         livesText.text = lives.ToString();
     }
 
